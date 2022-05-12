@@ -1,0 +1,44 @@
+from selenium.webdriver import Chrome
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+
+url = 'https://www.google.com/webhp?hl=pt-BR&sa=X&ved=0ahUKEwiTuOXu9Nn3AhXHpZUCHSNACU0QPAgI'
+navegador = Chrome()
+navegador.get(url)
+
+#2 PASSO: Pesquisar cotação dolar
+navegador.find_element(By.XPATH,
+                       '/html/body/div[1]/div[3]/form/div[1]/div[1]/div[1]/div/div[2]/input').send_keys('cotação dolar ')
+navegador.find_element(By.XPATH, 
+                       '/html/body/div[1]/div[3]/form/div[1]/div[1]/div[3]/center/input[1]').send_keys(Keys.ENTER)
+#3 PASSO: Pegar cotação dolar
+cotacao_dolar = navegador.find_element(By.XPATH, 
+                       '//*[@id="knowledge-currency__updatable-data-column"]/div[1]/div[2]/span[1]').get_attribute('data-value')
+print(f'Cotação do Dolar: ',cotacao_dolar)
+#4 PASSO: Pegar cotação euro
+navegador.get(url)
+navegador.find_element(By.XPATH,
+                       '/html/body/div[1]/div[3]/form/div[1]/div[1]/div[1]/div/div[2]/input').send_keys('cotação euro ')
+navegador.find_element(By.XPATH, 
+                       '/html/body/div[1]/div[3]/form/div[1]/div[1]/div[3]/center/input[1]').send_keys(Keys.ENTER)
+
+cotacao_euro = navegador.find_element(By.XPATH, 
+                       '//*[@id="knowledge-currency__updatable-data-column"]/div[1]/div[2]/span[1]').get_attribute('data-value')
+print('Cotação do Euro: ',cotacao_euro)
+
+
+#ATUALIZANDO BASE DE DADOS
+import pandas as pd
+
+tabela = pd.read_excel('Produto.xlsx')
+display(tabela)
+
+#ATUALIZAR COTAÇÃO EM TEMPO REAL
+#Atualizar Valor do Dola
+tabela.loc[tabela['Moeda'] == 'Dólar', 'Cotação'] = float(cotacao_dolar)
+
+#Atualizar Valor do Euro
+tabela.loc[tabela['Moeda'] == 'Euro', 'Cotação'] = float(cotacao_euro)
+
+display(tabela)
